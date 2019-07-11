@@ -1,4 +1,4 @@
-# loja-teste
+# Vue Ecommerce
 
 ## Project setup
 ```
