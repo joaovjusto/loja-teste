@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="app" v-loading.fullscreen.lock="$store.getters.carregando">
     <!-- <img alt="Vue logo" src="../assets/logo.png" /> -->
     <Header />
     <router-view class="fade-in"></router-view>

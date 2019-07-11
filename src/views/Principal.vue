@@ -76,6 +76,9 @@ export default {
       emptyCart: true
     };
   },
+  mounted() {
+    this.$store.commit("SET_LOADING_STATUS", true);
+  },
   methods: {
     monetary(num) {
       var value = Number(num);
