@@ -22,9 +22,9 @@
         <div class="cart-box">
           <div class="card-title">
             <h3>Carrinho</h3>
-            <span v-if="!emptyCart">{{"(" + 3 + " " + itemStr() + ")"}}</span>
+            <span v-if="!emptyCart">{{"(" + this.quantidade + " " + labelItem + ")"}}</span>
           </div>
-          <div class="cart-empty" v-if="emptyCart">
+          <div class="cart-empty" v-if="carrinhoVazio">
             <div class="img-cart">
               <img class="img-cart" src="../assets/cart-icon.svg" alt />
             </div>
@@ -33,14 +33,19 @@
           <div v-else>
             <div class="card" style="width: 18rem;">
               <ul class="list-group list-group-flush">
-                <li class="list-group-item flex">
+                <li class="list-group-item flex" v-for="item in listaFiltrada" :key="item._id">
                   <div>
-                    <img src="../assets/call-of-duty-infinite-warfare.png" alt />
+                    <img :src="require(`../assets/${item.image}`)" alt />
                   </div>
                   <div>
-                    <span class="cart-title">Título bem bonito grande e espaçoso</span>
-                    <span class="cart-price">R$ 49,90</span>
-                    <img class="icon-delete-cart" src="../assets/delete.svg" alt />
+                    <span class="cart-title">{{item.name}}</span>
+                    <span class="cart-price">{{"R$ " + monetary(item.price)}}</span>
+                    <img
+                      class="icon-delete-cart"
+                      @click="removerCarrinho(item._id)"
+                      src="../assets/delete.svg"
+                      alt
+                    />
                   </div>
                 </li>
               </ul>
@@ -80,7 +85,7 @@
                   </div>
                 </div>
                 <div class="text-show">
-                  <el-button type="text">adicionar ao carrinho</el-button>
+                  <el-button type="text" @click="adicionarCarrinho(item)">adicionar ao carrinho</el-button>
                 </div>
               </div>
             </el-card>
@@ -98,8 +103,14 @@ export default {
   name: "principal",
   data() {
     return {
+      subtotal: "",
+      frete: "",
+      total: "",
+      quantidade: 1,
+      labelItem: "item",
       itens: content,
       show: false,
+      listaFiltrada: [],
       options: [
         {
           value: "name",
@@ -115,16 +126,56 @@ export default {
         }
       ],
       filtro: "name",
-      emptyCart: false
+      emptyCart: true
     };
   },
   mounted() {
     this.loadingTimer();
   },
-  methods: {
-    itemStr() {
-      return "itens";
+  watch: {
+    quantidade: function(newValue) {
+      var local = newValue;
+      if (local == 1) {
+        this.labelItem = "item";
+      } else if (local >= 2) {
+        this.labelItem = "itens";
+      }
     },
+    listaFiltrada: function(newValue) {
+      var local = newValue;
+      this.quantidade = local.length;
+      if (local.length == 0) {
+        this.emptyCart = true;
+      }
+    }
+  },
+  methods: {
+    removerCarrinho(id) {
+      var i;
+      for (i = 0; i < this.listaFiltrada.length; i++) {
+        if (this.listaFiltrada[i]._id == id) {
+          this.listaFiltrada.splice(i, 1);
+          break;
+        }
+      }
+    },
+    adicionarCarrinho(item) {
+      var itemTemp = item;
+      itemTemp._id = item.id * Math.random();
+      this.listaFiltrada.push(item);
+      this.emptyCart = false;
+
+      // this.itemStr();
+    },
+    // itemStr() {
+    //   var local = this.quantidade;
+    //   console.log(local);
+    //   if (local == 1) {
+    //     this.labelItem = "item";
+    //   } else if (local >= 2) {
+    //     this.labelItem = "itens";
+    //   }
+    // },
     loadingTimer() {
       var self = this;
       this.$store.commit("SET_LOADING_STATUS", true);
@@ -148,6 +199,13 @@ export default {
     }
   },
   computed: {
+    carrinhoVazio: function() {
+      if (this.emptyCart) {
+        return true;
+      } else {
+        return false;
+      }
+    },
     sortedArray: function() {
       if (this.filtro == "name") {
         function compare(a, b) {
@@ -223,7 +281,9 @@ img {
   color: #7f7575;
   margin-left: 10px;
   line-height: 15px;
-  float: right;
+  float: left;
+  display: block;
+  width: 100%;
 }
 .list-group-item .cart-price {
   font-weight: 600;
@@ -264,6 +324,7 @@ img {
   text-decoration: none;
   outline: 0;
 }
+/* eslint-disable-next-line*/
 .list-group-item:hover img.icon-delete-cart {
   display: block;
   transition-duration: 1s;
