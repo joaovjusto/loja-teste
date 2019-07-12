@@ -22,6 +22,7 @@
         <div class="cart-box">
           <div class="card-title">
             <h3>Carrinho</h3>
+            <span v-if="!emptyCart">{{"(" + 3 + " " + itemStr() + ")"}}</span>
           </div>
           <div class="cart-empty" v-if="emptyCart">
             <div class="img-cart">
@@ -29,17 +30,57 @@
             </div>
             <p>Até o momento o seu carrinho está vazio</p>
           </div>
+          <div v-else>
+            <div class="card" style="width: 18rem;">
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item flex">
+                  <div>
+                    <img src="../assets/call-of-duty-infinite-warfare.png" alt />
+                  </div>
+                  <div>
+                    <span class="cart-title">Título bem bonito grande e espaçoso</span>
+                    <span class="cart-price">R$ 49,90</span>
+                    <img class="icon-delete-cart" src="../assets/delete.svg" alt />
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="finalize-shop">
+              <div class="row">
+                <div class="col-6 final-title">subtotal</div>
+                <div class="col-6 right">R$ 350,00</div>
+              </div>
+              <div class="row">
+                <div class="col-6 final-title">frete</div>
+                <div class="col-6 right">R$ 350,00</div>
+              </div>
+              <div class="row">
+                <div class="col-6 final-title">total</div>
+                <div class="col-6 right" style="font-size: 20px;">R$ 350,00</div>
+              </div>
+              <div class="row">
+                <div class="col-12">
+                  <el-button type="primary" style="width: 100%">finalizar compra</el-button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="col-9">
+      <div class="col-9" v-if="show">
         <div class="row">
           <div class="col-4" v-for="item in sortedArray" :key="item.id">
             <el-card :body-style="{ padding: '0px' }">
               <img :src="require(`../assets/${item.image}`)" class="image" />
-              <div class="text-center" style="padding: 15px;">
-                <span>{{item.name}}</span>
-                <div class="bottom clearfix text-center">
-                  <time class="time">{{"R$ " + monetary(item.price)}}</time>
+              <div class="hover-me">
+                <div class="text-center" style="padding: 15px;">
+                  <span>{{item.name}}</span>
+                  <div class="bottom clearfix text-center">
+                    <time class="time">{{"R$ " + monetary(item.price)}}</time>
+                  </div>
+                </div>
+                <div class="text-show">
+                  <el-button type="text">adicionar ao carrinho</el-button>
                 </div>
               </div>
             </el-card>
@@ -58,6 +99,7 @@ export default {
   data() {
     return {
       itens: content,
+      show: false,
       options: [
         {
           value: "name",
@@ -73,13 +115,25 @@ export default {
         }
       ],
       filtro: "name",
-      emptyCart: true
+      emptyCart: false
     };
   },
   mounted() {
-    this.$store.commit("SET_LOADING_STATUS", true);
+    this.loadingTimer();
   },
   methods: {
+    itemStr() {
+      return "itens";
+    },
+    loadingTimer() {
+      var self = this;
+      this.$store.commit("SET_LOADING_STATUS", true);
+
+      setTimeout(function() {
+        self.$store.commit("SET_LOADING_STATUS", false);
+        self.show = true;
+      }, 2000);
+    },
     monetary(num) {
       var value = Number(num);
 
@@ -135,6 +189,89 @@ img {
   -webkit-user-select: none;
   -ms-user-select: none;
 }
+.finalize-shop {
+  margin-top: 15px;
+}
+.finalize-shop .final-title {
+  color: #7f7575;
+  font-size: 14px;
+}
+.right {
+  text-align: right;
+  margin-bottom: 10px;
+  color: #423b3b;
+  font-size: 16px;
+  font-weight: 600;
+}
+.card {
+  width: 100% !important;
+  border: none;
+}
+.list-group-item {
+  padding: 0;
+  margin-bottom: 25px;
+  border: none;
+}
+.list-group-item img {
+  background-color: #eeeeee;
+  height: 50px;
+  padding: 5px;
+  border-radius: 5px;
+}
+.list-group-item .cart-title {
+  font-size: 14px;
+  color: #7f7575;
+  margin-left: 10px;
+  line-height: 15px;
+  float: right;
+}
+.list-group-item .cart-price {
+  font-weight: 600;
+  font-size: 14px;
+  color: #423b3b;
+  margin-left: 10px;
+}
+.list-group-item img.icon-delete-cart {
+  display: none;
+  height: 15px;
+  position: absolute;
+  top: 20px;
+  right: 0;
+  background: none;
+  padding: 0;
+}
+.hover-me {
+  min-height: 100px;
+}
+.hover-me:hover .text-center {
+  display: none;
+}
+.hover-me:hover .text-show {
+  display: block;
+}
+.text-show {
+  display: none;
+}
+.el-button--text {
+  font-size: 16px;
+  color: #3487dc;
+  text-align: center;
+  width: 100%;
+  font-weight: 600;
+  margin-top: 15px;
+}
+.el-button--text:focus {
+  text-decoration: none;
+  outline: 0;
+}
+.list-group-item:hover img.icon-delete-cart {
+  display: block;
+  transition-duration: 1s;
+  cursor: pointer;
+}
+.flex {
+  display: inline-flex;
+}
 .el-card.is-always-shadow {
   box-shadow: none !important;
 }
@@ -166,6 +303,9 @@ img {
 .custom-height {
   height: 120px;
 }
+.cart-empty {
+  margin-bottom: 60px;
+}
 .cart-empty p {
   font-family: "Open Sans";
   text-align: center;
@@ -177,17 +317,26 @@ img {
   text-align: center;
   margin-top: 30px;
 }
+.card-title {
+  display: inline-flex;
+}
 .card-title h3 {
   font-family: "Open Sans";
   font-weight: 600;
   font-size: 20px;
+}
+.card-title span {
+  font-family: "Open Sans";
+  font-size: 14px;
+  color: #7f7575;
+  margin-left: 5px;
 }
 .cart-box {
   border: 1px solid #e1e1e1;
   border-radius: 5px;
   margin: 42px 70px 42px 0;
   width: 260px;
-  height: 360px;
+  /* height: 500px; */
   padding: 20px;
 }
 .title h3 {
