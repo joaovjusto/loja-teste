@@ -42,7 +42,7 @@
                     <span class="cart-price">{{"R$ " + monetary(item.price)}}</span>
                     <img
                       class="icon-delete-cart"
-                      @click="removerCarrinho(item._id)"
+                      @click="removerCarrinho(item)"
                       src="../assets/delete.svg"
                       alt
                     />
@@ -53,15 +53,16 @@
             <div class="finalize-shop">
               <div class="row">
                 <div class="col-6 final-title">subtotal</div>
-                <div class="col-6 right">R$ 350,00</div>
+                <!-- <div class="col-6 right">R$ 350,00</div> -->
+                <div class="col-6 right">{{"R$ " + monetary(subtotal)}}</div>
               </div>
               <div class="row">
                 <div class="col-6 final-title">frete</div>
-                <div class="col-6 right">R$ 350,00</div>
+                <div class="col-6 right">{{"R$ " + monetary(frete)}}</div>
               </div>
               <div class="row">
-                <div class="col-6 final-title">total</div>
-                <div class="col-6 right" style="font-size: 20px;">R$ 350,00</div>
+                <div class="col-4 final-title">total</div>
+                <div class="col-8 right" style="font-size: 20px;">{{"R$ " + monetary(total)}}</div>
               </div>
               <div class="row">
                 <div class="col-12">
@@ -103,9 +104,9 @@ export default {
   name: "principal",
   data() {
     return {
-      subtotal: "",
-      frete: "",
-      total: "",
+      subtotal: 0,
+      frete: 0,
+      total: 0,
       quantidade: 1,
       labelItem: "item",
       itens: content,
@@ -150,32 +151,23 @@ export default {
     }
   },
   methods: {
-    removerCarrinho(id) {
+    removerCarrinho(item) {
       var i;
       for (i = 0; i < this.listaFiltrada.length; i++) {
-        if (this.listaFiltrada[i]._id == id) {
+        if (this.listaFiltrada[i]._id == item._id) {
           this.listaFiltrada.splice(i, 1);
           break;
         }
       }
     },
     adicionarCarrinho(item) {
-      var itemTemp = item;
+      var itemTemp = Object.assign({}, item);
       itemTemp._id = item.id * Math.random();
       this.listaFiltrada.push(item);
       this.emptyCart = false;
 
-      // this.itemStr();
+      // this.subtotal = this.subtotal + item.price;
     },
-    // itemStr() {
-    //   var local = this.quantidade;
-    //   console.log(local);
-    //   if (local == 1) {
-    //     this.labelItem = "item";
-    //   } else if (local >= 2) {
-    //     this.labelItem = "itens";
-    //   }
-    // },
     loadingTimer() {
       var self = this;
       this.$store.commit("SET_LOADING_STATUS", true);
@@ -411,4 +403,3 @@ img {
   margin: 42px 30px;
 }
 </style>
-
