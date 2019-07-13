@@ -39,7 +39,7 @@
                   </div>
                   <div>
                     <span class="cart-title">{{item.name}}</span>
-                    <span class="cart-price">{{"R$ " + monetary(item.price)}}</span>
+                    <span class="cart-price">{{"R$ " + formatNum(item.price)}}</span>
                     <img
                       class="icon-delete-cart"
                       @click="removerCarrinho(item)"
@@ -54,15 +54,18 @@
               <div class="row">
                 <div class="col-6 final-title">subtotal</div>
                 <!-- <div class="col-6 right">R$ 350,00</div> -->
-                <div class="col-6 right">{{"R$ " + monetary(subtotal)}}</div>
+                <div class="col-6 right">{{"R$ " + formatNum(regraNegocio.subtotal)}}</div>
               </div>
               <div class="row">
                 <div class="col-6 final-title">frete</div>
-                <div class="col-6 right">{{"R$ " + monetary(frete)}}</div>
+                <div class="col-6 right">{{"R$ " + formatNum(regraNegocio.frete)}}</div>
               </div>
               <div class="row">
                 <div class="col-4 final-title">total</div>
-                <div class="col-8 right" style="font-size: 20px;">{{"R$ " + monetary(total)}}</div>
+                <div
+                  class="col-8 right"
+                  style="font-size: 20px;"
+                >{{"R$ " + formatNum(regraNegocio.total)}}</div>
               </div>
               <div class="row">
                 <div class="col-12">
@@ -82,7 +85,7 @@
                 <div class="text-center" style="padding: 15px;">
                   <span>{{item.name}}</span>
                   <div class="bottom clearfix text-center">
-                    <time class="time">{{"R$ " + monetary(item.price)}}</time>
+                    <time class="time">{{"R$ " + formatNum(item.price)}}</time>
                   </div>
                 </div>
                 <div class="text-show">
@@ -104,9 +107,6 @@ export default {
   name: "principal",
   data() {
     return {
-      subtotal: 0,
-      frete: 0,
-      total: 0,
       quantidade: 1,
       labelItem: "item",
       itens: content,
@@ -132,6 +132,11 @@ export default {
   },
   mounted() {
     this.loadingTimer();
+
+    var i;
+    for (i = 0; i < this.itens.length; i++) {
+      this.itens[i].price = this.monetary(this.itens[i].price);
+    }
   },
   watch: {
     quantidade: function(newValue) {
@@ -163,10 +168,8 @@ export default {
     adicionarCarrinho(item) {
       var itemTemp = Object.assign({}, item);
       itemTemp._id = item.id * Math.random();
-      this.listaFiltrada.push(item);
+      this.listaFiltrada.push(itemTemp);
       this.emptyCart = false;
-
-      // this.subtotal = this.subtotal + item.price;
     },
     loadingTimer() {
       var self = this;
@@ -177,6 +180,11 @@ export default {
         self.show = true;
       }, 2000);
     },
+    formatNum(valor) {
+      valor = valor.toFixed(2);
+      valor += "";
+      return valor.replace(".", ",");
+    },
     monetary(num) {
       var value = Number(num);
 
@@ -186,11 +194,29 @@ export default {
         value = value.toFixed(2);
       }
 
-      var ret = value.replace(".", ",");
-      return ret;
+      return parseFloat(value);
     }
   },
   computed: {
+    regraNegocio: function() {
+      var obj = {
+        price: 0,
+        subtotal: 0,
+        frete: 0
+      };
+
+      var i;
+      for (i = 0; i < this.listaFiltrada.length; i++) {
+        obj.subtotal += this.listaFiltrada[i].price;
+      }
+      obj.frete = 10 * this.quantidade;
+      if (obj.subtotal > 250) {
+        obj.frete = 0;
+      }
+      obj.total = obj.subtotal + obj.frete;
+
+      return obj;
+    },
     carrinhoVazio: function() {
       if (this.emptyCart) {
         return true;
