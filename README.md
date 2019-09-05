@@ -1,5 +1,8 @@
 # Vue Ecommerce
 
+## Project published link
+https://joaovjusto.github.io/vue-ecommerce/
+
 ## Project setup
 ```
 yarn install
